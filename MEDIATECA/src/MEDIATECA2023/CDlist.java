@@ -20,10 +20,16 @@ public class CDlist {
             JFrame frame = new JFrame("Lista de CDs");
             JTable table = new JTable(buildTableModel(resultSet));
             JScrollPane scrollPane = new JScrollPane(table);
+
+
+
             frame.add(scrollPane);
             frame.setSize(600, 400);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setVisible(true);
+
+
+
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

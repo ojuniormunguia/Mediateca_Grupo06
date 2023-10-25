@@ -1,5 +1,7 @@
 package MEDIATECA2023;
 
+import MEDIATECA2023.New_cd;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -14,6 +16,10 @@ public class Main extends JFrame {
     private JTable dataTable;
 
     public Main() {
+        // Set a consistent color scheme
+        Color primaryColor = new Color(34, 139, 34);
+        Color secondaryColor = new Color(0, 102, 204);
+
         setTitle("Mediateca");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -21,9 +27,10 @@ public class Main extends JFrame {
 
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        JButton menuItem1 = new JButton("TODOS");
-        JButton menuItem2 = new JButton("DISPONIBLES");
-        JButton menuItem3 = new JButton("AGREGAR");
+
+        JButton menuItem1 = createStyledButton("TODOS", primaryColor, Color.white);
+        JButton menuItem2 = createStyledButton("DISPONIBLES", primaryColor, Color.white);
+        JButton menuItem3 = createStyledButton("AGREGAR", primaryColor, Color.white);
 
         menuPanel.add(menuItem1);
         menuPanel.add(menuItem2);
@@ -31,23 +38,22 @@ public class Main extends JFrame {
 
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
+
         // Default content
         JLabel contentLabel = new JLabel("Elija el contenido a mostrar");
         contentLabel.setHorizontalAlignment(JLabel.CENTER);
         contentPanel.add(contentLabel, BorderLayout.CENTER);
 
-        // LISTENERS
         menuItem1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Add a JPanel submenu for 4 buttons
                 JPanel subMenuPanel = new JPanel();
                 subMenuPanel.setLayout(new BoxLayout(subMenuPanel, BoxLayout.Y_AXIS));
 
-                JButton cdButton = new JButton("CD");
-                JButton dvdButton = new JButton("DVD");
-                JButton bookButton = new JButton("BOOK");
-                JButton magazineButton = new JButton("MAGAZINE");
+                JButton cdButton = createStyledButton("CD", secondaryColor, Color.white);
+                JButton dvdButton = createStyledButton("DVD", secondaryColor, Color.white);
+                JButton bookButton = createStyledButton("BOOK", secondaryColor, Color.white);
+                JButton magazineButton = createStyledButton("MAGAZINE", secondaryColor, Color.white);
 
                 subMenuPanel.add(cdButton);
                 subMenuPanel.add(dvdButton);
@@ -94,9 +100,26 @@ public class Main extends JFrame {
         menuItem3.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JLabel newContentLabel = new JLabel("AGREGAR");
-                newContentLabel.setHorizontalAlignment(JLabel.CENTER);
-                setContentPanel(newContentLabel);
+                JPanel subMenuPanel2 = new JPanel();
+                subMenuPanel2.setLayout(new BoxLayout(subMenuPanel2, BoxLayout.Y_AXIS));
+
+                JButton cdButton = createStyledButton("CD", secondaryColor, Color.white);
+                JButton dvdButton = createStyledButton("DVD", secondaryColor, Color.white);
+                JButton bookButton = createStyledButton("BOOK", secondaryColor, Color.white);
+                JButton magazineButton = createStyledButton("MAGAZINE", secondaryColor, Color.white);
+
+                subMenuPanel2.add(cdButton);
+                subMenuPanel2.add(dvdButton);
+                subMenuPanel2.add(bookButton);
+                subMenuPanel2.add(magazineButton);
+
+                cdButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        New_cd newCdWindow = new New_cd();
+                        newCdWindow.setVisible(true);
+                    }
+                });
+                setContentPanel(subMenuPanel2);
             }
         });
 
@@ -106,18 +129,25 @@ public class Main extends JFrame {
         setVisible(true);
     }
 
-    // Convert ResultSet to DefaultTableModel
+    private JButton createStyledButton(String text, Color bgColor, Color textColor) {
+        JButton button = new JButton(text);
+        button.setBackground(bgColor);
+        button.setForeground(textColor);
+        button.setFont(new Font("Arial", Font.BOLD, 14));
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        return button;
+    }
+
     public static DefaultTableModel buildTableModel(ResultSet resultSet) throws SQLException {
         ResultSetMetaData metaData = resultSet.getMetaData();
 
-        // Get the column names
         int columnCount = metaData.getColumnCount();
         Vector<String> columnNames = new Vector<>();
         for (int column = 1; column <= columnCount; column++) {
             columnNames.add(metaData.getColumnName(column));
         }
 
-        // Get the data
         Vector<Vector<Object>> data = new Vector<>();
         while (resultSet.next()) {
             Vector<Object> row = new Vector<>();
@@ -138,7 +168,6 @@ public class Main extends JFrame {
     }
 
     private void displayTable(String tableName) {
-        // Display the table for the given table name
         try {
             Connection connection = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/mediateca",
@@ -148,26 +177,53 @@ public class Main extends JFrame {
 
             ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName);
 
-            // Create a JTable and set it as the content
+            JFrame frame = new JFrame("Lista de " + tableName);
             JTable table = new JTable(buildTableModel(resultSet));
             JScrollPane scrollPane = new JScrollPane(table);
             contentPanel.removeAll();
             contentPanel.add(scrollPane, BorderLayout.CENTER);
+
+            Color secondaryColor = new Color(255, 165, 0); // Replace with your preferred color
+
+
+            JButton updateButton = createStyledButton("Editar", secondaryColor, Color.white);
+            JButton deleteButton = createStyledButton("Borrar", secondaryColor, Color.white);
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.add(updateButton);
+            buttonPanel.add(deleteButton);
+
+            contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+
             contentPanel.revalidate();
             contentPanel.repaint();
 
+            updateButton.addActionListener(e -> {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    // Update the selected row
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Elija un item para editar");
+                }
+            });
+            deleteButton.addActionListener(e -> {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    DefaultTableModel model = (DefaultTableModel) table.getModel();
+                    model.removeRow(selectedRow);
+                    String id = (String) model.getValueAt(selectedRow, 0);
+                    try {
+                        Statement statement1 = connection.createStatement();
+                        statement1.executeUpdate("DELETE FROM " + tableName + " WHERE id = " + id);
+                    } catch (SQLException ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Elija un item para borrar");
+                }
+            });
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-    }
-
-    private void displayPlaceholderLabel(String label) {
-        contentPanel.removeAll();
-        JLabel placeholderLabel = new JLabel("Placeholder for " + label);
-        placeholderLabel.setHorizontalAlignment(JLabel.CENTER);
-        contentPanel.add(placeholderLabel, BorderLayout.CENTER);
-        contentPanel.revalidate();
-        contentPanel.repaint();
     }
 
     public static void main(String[] args) {
