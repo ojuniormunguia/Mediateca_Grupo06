@@ -22,7 +22,6 @@ public class CDlist {
             JScrollPane scrollPane = new JScrollPane(table);
 
 
-
             frame.add(scrollPane);
             frame.setSize(600, 400);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

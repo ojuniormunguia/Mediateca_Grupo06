@@ -1,6 +1,7 @@
 package MEDIATECA2023;
 
-import MEDIATECA2023.New_cd;
+import MEDIATECA2023.Añadir_editar.Edit_CD;
+import MEDIATECA2023.Añadir_editar.New_cd;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -8,17 +9,20 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
+import java.util.Map;
 import java.util.Vector;
-
+import java.util.HashMap;
 public class Main extends JFrame {
     private JPanel contentPanel;
     private DefaultTableModel tableModel;
     private JTable dataTable;
 
     public Main() {
-        // Set a consistent color scheme
+        // Colores (temporalmente)
         Color primaryColor = new Color(34, 139, 34);
         Color secondaryColor = new Color(0, 102, 204);
+
+
 
         setTitle("Mediateca");
         setSize(800, 600);
@@ -28,6 +32,7 @@ public class Main extends JFrame {
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
 
+        //botones
         JButton menuItem1 = createStyledButton("TODOS", primaryColor, Color.white);
         JButton menuItem2 = createStyledButton("DISPONIBLES", primaryColor, Color.white);
         JButton menuItem3 = createStyledButton("AGREGAR", primaryColor, Color.white);
@@ -43,6 +48,7 @@ public class Main extends JFrame {
         JLabel contentLabel = new JLabel("Elija el contenido a mostrar");
         contentLabel.setHorizontalAlignment(JLabel.CENTER);
         contentPanel.add(contentLabel, BorderLayout.CENTER);
+
 
         menuItem1.addActionListener(new ActionListener() {
             @Override
@@ -116,6 +122,9 @@ public class Main extends JFrame {
                 cdButton.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         New_cd newCdWindow = new New_cd();
+                        newCdWindow.setCallback(() -> {
+                            displayTable("cd");
+                        });
                         newCdWindow.setVisible(true);
                     }
                 });
@@ -168,6 +177,9 @@ public class Main extends JFrame {
     }
 
     private void displayTable(String tableName) {
+
+
+
         try {
             Connection connection = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/mediateca",
@@ -183,8 +195,7 @@ public class Main extends JFrame {
             contentPanel.removeAll();
             contentPanel.add(scrollPane, BorderLayout.CENTER);
 
-            Color secondaryColor = new Color(255, 165, 0); // Replace with your preferred color
-
+            Color secondaryColor = new Color(255, 165, 0);
 
             JButton updateButton = createStyledButton("Editar", secondaryColor, Color.white);
             JButton deleteButton = createStyledButton("Borrar", secondaryColor, Color.white);
@@ -200,20 +211,53 @@ public class Main extends JFrame {
             updateButton.addActionListener(e -> {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow != -1) {
-                    // Update the selected row
+                    String id = (String) table.getValueAt(selectedRow, 0);
+                    String titulo = (String) table.getValueAt(selectedRow, 1);
+                    String artista = (String) table.getValueAt(selectedRow, 2);
+                    String genero = (String) table.getValueAt(selectedRow, 3);
+                    float duracion = (float) table.getValueAt(selectedRow, 4);
+                    int numero = (int) table.getValueAt(selectedRow, 5);
+                    int cdDisp = (int) table.getValueAt(selectedRow, 6);
+
+                    Edit_CD editCdWindow = new Edit_CD(id, titulo, artista, genero, duracion, numero, cdDisp);
+                    editCdWindow.setCallback(() -> {
+                        displayTable("cd");
+                    });
+                    editCdWindow.setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(frame, "Elija un item para editar");
                 }
             });
             deleteButton.addActionListener(e -> {
+                // Encontrar la llave primaria de cada tabla
+                Map<String, String> tableNameToPrimaryKey = new HashMap<>();
+                tableNameToPrimaryKey.put("cd", "cd_id");
+                tableNameToPrimaryKey.put("dvds", "dvd_id");
+                tableNameToPrimaryKey.put("revistas", "revistas_id");
+                tableNameToPrimaryKey.put("libro", "libro_id");
+
                 int selectedRow = table.getSelectedRow();
-                if (selectedRow != -1) {
-                    DefaultTableModel model = (DefaultTableModel) table.getModel();
-                    model.removeRow(selectedRow);
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+
+                if (selectedRow >= 0 && selectedRow < model.getRowCount()) {
                     String id = (String) model.getValueAt(selectedRow, 0);
                     try {
                         Statement statement1 = connection.createStatement();
-                        statement1.executeUpdate("DELETE FROM " + tableName + " WHERE id = " + id);
+                        String primaryKey = tableNameToPrimaryKey.get(tableName);
+
+
+                        if (primaryKey != null){
+                            statement1.executeUpdate("DELETE FROM " + tableName + " WHERE " + primaryKey + " = '" + id + "'");
+                            // REFRESCA LA PÁGINA
+                            DefaultTableModel newModel = buildTableModel(statement1.executeQuery("SELECT * FROM " + tableName));
+                            table.setModel(newModel);
+                            JOptionPane.showMessageDialog(frame, "Item borrado exitosamente.");}
+                            //FIN DE REFRESCAR LA PÁGINA
+
+                        else {
+                            JOptionPane.showMessageDialog(frame, "La tabla seleccionada no es válida.");
+                        }
+
                     } catch (SQLException ex) {
                         ex.printStackTrace();
                     }
@@ -225,6 +269,7 @@ public class Main extends JFrame {
             ex.printStackTrace();
         }
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
