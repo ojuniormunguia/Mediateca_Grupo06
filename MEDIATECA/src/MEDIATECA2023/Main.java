@@ -1,7 +1,6 @@
 package MEDIATECA2023;
 
-import MEDIATECA2023.Añadir_editar.Edit_CD;
-import MEDIATECA2023.Añadir_editar.New_cd;
+import MEDIATECA2023.Añadir_editar.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -119,6 +118,7 @@ public class Main extends JFrame {
                 subMenuPanel2.add(bookButton);
                 subMenuPanel2.add(magazineButton);
 
+                //boton de agregar cd
                 cdButton.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         New_cd newCdWindow = new New_cd();
@@ -126,6 +126,39 @@ public class Main extends JFrame {
                             displayTable("cd");
                         });
                         newCdWindow.setVisible(true);
+                    }
+                });
+
+                //boton de agregar dvd
+                magazineButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        New_revista newRevistaWindow = new New_revista();
+                        newRevistaWindow.setCallback(() -> {
+                            displayTable("revistas");
+                        });
+                        newRevistaWindow.setVisible(true);
+                    }
+                });
+
+                //boton de agregar libro
+                bookButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        New_libro newLibroWindow = new New_libro();
+                        newLibroWindow.setCallback(() -> {
+                            displayTable("libro");
+                        });
+                        newLibroWindow.setVisible(true);
+                    }
+                });
+
+                //boton de agregar dvd
+                dvdButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        New_dvd newDvdWindow = new New_dvd();
+                        newDvdWindow.setCallback(() -> {
+                            displayTable("dvds");
+                        });
+                        newDvdWindow.setVisible(true);
                     }
                 });
                 setContentPanel(subMenuPanel2);

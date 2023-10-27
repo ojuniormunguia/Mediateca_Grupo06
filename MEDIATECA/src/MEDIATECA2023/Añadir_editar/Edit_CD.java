@@ -23,9 +23,10 @@ public class Edit_CD extends JFrame {
     private String originalTitulo;
     private String originalArtista;
     private String originalGenero;
-    private float originalDuracion;
+    private double originalDuracion;
     private int originalNumero;
     private int originalDisp;
+
 
     public Edit_CD(String id, String titulo, String artista, String genero, float duracion, int numero, int disp) {
         setTitle("Editar CD");
