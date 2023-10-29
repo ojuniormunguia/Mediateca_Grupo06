@@ -1,7 +1,5 @@
 package MEDIATECA2023;
 
-import MEDIATECA2023.Añadir_editar.Edit_CD;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -11,44 +9,58 @@ import java.sql.*;
 public class Login {
 
     private Connection connection = null;
-    private JPanel main;
-    private JTextField textField1;
-    private JButton button1;
-    private JPasswordField passwordField1;
+    private JFrame loginFrame;
+    private JPanel mainPanel;
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JButton loginButton;
 
     public String permissionType;
     public String userId;
 
-
     public Login() {
-        Connection connection = DatabaseConnection.getConnection();
+        connection = DatabaseConnection.getConnection();
 
-        // ABRE UNA NUEVA VENTANA
-        initializeUI();
-    }
+        loginFrame = new JFrame("Iniciar Sesión");
+        loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginFrame.setSize(400, 200);
 
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new GridLayout(3, 2, 10, 10));
 
+        JLabel usernameLabel = new JLabel("Usuario:");
+        usernameField = new JTextField();
 
-    private void initializeUI() {
-        Connection connection = DatabaseConnection.getConnection();
+        JLabel passwordLabel = new JLabel("Contraseña:");
+        passwordField = new JPasswordField();
 
-        this.connection = connection;
-        button1.addActionListener(new ActionListener() {
+        loginButton = new JButton("Iniciar Sesión");
+
+        mainPanel.add(usernameLabel);
+        mainPanel.add(usernameField);
+        mainPanel.add(passwordLabel);
+        mainPanel.add(passwordField);
+        mainPanel.add(new JLabel());
+        mainPanel.add(loginButton);
+
+        loginFrame.add(mainPanel, BorderLayout.CENTER);
+
+        loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 validateUser();
             }
         });
+
+        loginFrame.setVisible(true);
     }
 
-
     public void validateUser() {
-        String user = textField1.getText();
-        char[] passwordChars = passwordField1.getPassword();
+        String user = usernameField.getText();
+        char[] passwordChars = passwordField.getPassword();
         String password = new String(passwordChars);
 
         try {
-            // BUSCA SI ES UN ADMIN
             String adminSQL = "SELECT * FROM administrador WHERE admin_id = ? AND contrasena = ?";
             PreparedStatement adminStatement = connection.prepareStatement(adminSQL);
             adminStatement.setString(1, user);
@@ -57,16 +69,11 @@ public class Login {
             ResultSet adminResultSet = adminStatement.executeQuery();
 
             if (adminResultSet.next()) {
-                //LO ENVIA DONDE ADMIN
                 permissionType = "adm_";
                 userId = user;
-                System.out.println("Login: " + permissionType + userId);
-
                 new AdminView(permissionType, userId);
-                JFrame loginFrame = (JFrame) SwingUtilities.getWindowAncestor(main);
                 loginFrame.dispose();
             } else {
-                // SI NO ES ADMIN, BUSCA SI ES SOCIO
                 String userSQL = "SELECT * FROM socio WHERE socio_id = ? AND contrasena = ?";
                 PreparedStatement userStatement = connection.prepareStatement(userSQL);
                 userStatement.setString(1, user);
@@ -75,16 +82,12 @@ public class Login {
                 ResultSet userResultSet = userStatement.executeQuery();
 
                 if (userResultSet.next()) {
-                    //LO ENVIA DONDE SOCIO
                     permissionType = "socio_";
                     userId = user;
-                    System.out.println("Login: " + permissionType + userId);
-                    new Main(userId, permissionType);
-                    JFrame loginFrame = (JFrame) SwingUtilities.getWindowAncestor(main);
+                    new SocioView(permissionType, userId);
                     loginFrame.dispose();
                 } else {
                     JOptionPane.showMessageDialog(null, "Usuario o contraseña incorrectos");
-
                 }
 
                 userResultSet.close();
@@ -99,14 +102,10 @@ public class Login {
         }
     }
 
-
     public Component main() {
-        System.out.println("Login: " + permissionType + userId);
-        return main;
+        return mainPanel;
     }
 
-
-    //send permissionType and userId to Main
     public String getPermissionType() {
         return permissionType;
     }
@@ -114,7 +113,4 @@ public class Login {
     public String getUserId() {
         return userId;
     }
-    //save permissionType and userId data from login to Main
-
-
 }

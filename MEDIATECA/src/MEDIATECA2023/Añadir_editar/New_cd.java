@@ -39,11 +39,11 @@ public class New_cd extends JFrame {
         duracionField = new JTextField();
         JLabel numeroLabel = new JLabel("numero:");
         numeroField = new JTextField();
-        JLabel cdDispLabel = new JLabel("cdDisp:");
+        JLabel cdDispLabel = new JLabel("cds disponibles:");
         dispField = new JTextField();
 
 
-        JButton addButton = new JButton("Agregar revista");
+        JButton addButton = new JButton("Agregar CD");
 
         // Add components to the frame
         add(cd_idLabel);
@@ -105,7 +105,7 @@ public class New_cd extends JFrame {
                 }
                 dispose(); // Close the window after adding the CD
             } else {
-                JOptionPane.showMessageDialog(this, "Error al agregar el revista.");
+                JOptionPane.showMessageDialog(this, "Error al agregar el CD.");
             }
 
         } catch (SQLException ex) {

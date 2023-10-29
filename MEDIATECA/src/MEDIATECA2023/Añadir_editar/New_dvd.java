@@ -18,7 +18,7 @@ public class New_dvd extends JFrame {
     private JTextField dvdDispField;
     private New_dvd.ConfirmedDVD callback;
     public New_dvd() {
-        setTitle("Agregar una nueva revista");
+        setTitle("Agregar un nuevo DVD");
         setSize(400, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(10, 1));
@@ -33,11 +33,11 @@ public class New_dvd extends JFrame {
         duracionField = new JTextField();
         JLabel generoLabel = new JLabel("genero:");
         generoField = new JTextField();
-        JLabel dvdDispLabel = new JLabel("dvdDisp:");
+        JLabel dvdDispLabel = new JLabel("DVD disponibles:");
         dvdDispField = new JTextField();
 
 
-        JButton addButton = new JButton("Agregar revista");
+        JButton addButton = new JButton("Agregar DVD");
 
         // Add components to the frame
         add(libro_idLabel);

@@ -14,13 +14,14 @@ import java.util.Vector;
 import java.util.Map;
 import java.util.HashMap;
 
-public class AdminView extends JFrame {
+public class SocioView extends JFrame {
     private JPanel contentPanel;
     public String permisos;
     public String identificador;
 
 
-    public AdminView(String permissionType, String userId) {
+    public SocioView(String permissionType, String userId) {
+        System.out.println(userId + " " + permissionType);
         JFrame frame = new JFrame("MEDIATECA 2023");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
@@ -30,36 +31,6 @@ public class AdminView extends JFrame {
 
         JMenuBar menuBar = new JMenuBar();
         frame.setJMenuBar(menuBar);
-
-        JMenu verMenu = new JMenu("Ver todos");
-        menuBar.add(verMenu);
-
-        JMenuItem cdTodo = new JMenuItem("CDs");
-        verMenu.add(cdTodo);
-
-        JMenuItem dvdTodo = new JMenuItem("DVDs");
-        verMenu.add(dvdTodo);
-
-        JMenuItem revistaTodo = new JMenuItem("Revistas");
-        verMenu.add(revistaTodo);
-
-        JMenuItem libroTodo = new JMenuItem("Libros");
-        verMenu.add(libroTodo);
-
-        JMenu addMenu = new JMenu("Agregar");
-        menuBar.add(addMenu);
-
-        JMenuItem cdAdd = new JMenuItem("CD");
-        addMenu.add(cdAdd);
-
-        JMenuItem dvdAdd = new JMenuItem("DVD");
-        addMenu.add(dvdAdd);
-
-        JMenuItem revistaAdd = new JMenuItem("Revista");
-        addMenu.add(revistaAdd);
-
-        JMenuItem libroAdd = new JMenuItem("Libro");
-        addMenu.add(libroAdd);
 
         JMenu dispMenu = new JMenu("Disponibles");
         menuBar.add(dispMenu);
@@ -95,82 +66,7 @@ public class AdminView extends JFrame {
 
         contentPanel.setLayout(new BorderLayout());
         frame.add(contentPanel, BorderLayout.CENTER);
-        //al seleccionar todos los cds
-        cdTodo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                displayTable("cd");
-            }
-        });
 
-        dvdTodo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                displayTable("dvds");
-            }
-        });
-
-        libroTodo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                displayTable("libro");
-            }
-        });
-
-        revistaTodo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                displayTable("revistas");
-            }
-        });
-
-        //al seleccionar agregar cd
-
-        cdAdd.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                New_cd newCdWindow = new New_cd();
-                newCdWindow.setCallback(() -> {
-                    displayTable("cd");
-                });
-                newCdWindow.setVisible(true);
-            }
-        });
-
-        dvdAdd.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                New_dvd newDvdWindow = new New_dvd();
-                newDvdWindow.setCallback(() -> {
-                    displayTable("dvds");
-                });
-                newDvdWindow.setVisible(true);
-            }
-        });
-
-        libroAdd.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                New_libro newLibroWindow = new New_libro();
-                newLibroWindow.setCallback(() -> {
-                    displayTable("libro");
-                });
-                newLibroWindow.setVisible(true);
-            }
-        });
-
-        revistaAdd.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                New_revista newRevistaWindow = new New_revista();
-                newRevistaWindow.setCallback(() -> {
-                    displayTable("revistas");
-                });
-                newRevistaWindow.setVisible(true);
-            }
-        });
-
-        //al seleccionar disponibles
 
         cdDisponibles.addActionListener(new ActionListener() {
             @Override
@@ -569,6 +465,7 @@ public class AdminView extends JFrame {
     //TABLA DE RENTADOS
     private void displayRentedTable(String tableName) {
         Connection connection = DatabaseConnection.getConnection();
+
 
         ColectorDeColumnas mapper = new ColectorDeColumnas();
         try {

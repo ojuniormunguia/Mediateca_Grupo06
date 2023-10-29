@@ -31,9 +31,9 @@ public class New_revista extends JFrame {
         editorField = new JTextField();
         JLabel periocidadLabel = new JLabel("periocidad:");
         periocidadField = new JTextField();
-        JLabel yearPublicLabel = new JLabel("yearPublic:");
+        JLabel yearPublicLabel = new JLabel("año de publicación:");
         yearPublicField = new JTextField();
-        JLabel revistasDispLabel = new JLabel("revistasDisp:");
+        JLabel revistasDispLabel = new JLabel("revistas disponibles:");
         revistasDispField = new JTextField();
 
 
@@ -95,7 +95,7 @@ public class New_revista extends JFrame {
                 }
                 dispose(); // Close the window after adding the CD
             } else {
-                JOptionPane.showMessageDialog(this, "Error al agregar el revista.");
+                JOptionPane.showMessageDialog(this, "Error al agregar la revista.");
             }
 
         } catch (SQLException ex) {

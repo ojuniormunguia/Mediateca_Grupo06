@@ -49,7 +49,7 @@ public class Edit_Libro extends JFrame {
         originalIsbn = isbn;
         JLabel yearPublicLabel = new JLabel("yearPublic:");
         originalYearPublic = yearPublic;
-        JLabel librosDispLabel = new JLabel("librosDisp:");
+        JLabel librosDispLabel = new JLabel("libros disponibles:");
         originalLibrosDisp = librosDisp;
 
 

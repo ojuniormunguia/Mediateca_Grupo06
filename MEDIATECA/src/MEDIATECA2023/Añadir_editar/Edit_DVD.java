@@ -26,7 +26,7 @@ public class Edit_DVD extends JFrame {
     private int originalDvdDisp;
 
     public Edit_DVD(String id, String titulo, String director, double duracion, String genero, int dvdDisp) {
-        setTitle("Editar CD");
+        setTitle("Editar DVD");
         setSize(400, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(8, 1));

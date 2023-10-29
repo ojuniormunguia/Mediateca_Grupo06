@@ -20,7 +20,7 @@ public class New_libro extends JFrame {
     private JTextField librosDispField;
     private New_libro.ConfirmedLibro callback;
     public New_libro() {
-        setTitle("Agregar una nueva revista");
+        setTitle("Agregar un nuevo libro");
         setSize(400, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new GridLayout(10, 1));
@@ -37,14 +37,14 @@ public class New_libro extends JFrame {
         editorialField = new JTextField();
         JLabel isbnLabel = new JLabel("isbn:");
         isbnField = new JTextField();
-        JLabel yearPublicLabel = new JLabel("yearPublic:");
+        JLabel yearPublicLabel = new JLabel("año de publicación:");
         yearPublicField = new JTextField();
-        JLabel librosDispLabel = new JLabel("librosDisp:");
+        JLabel librosDispLabel = new JLabel("libros disponibles:");
         librosDispField = new JTextField();
 
 
 
-        JButton addButton = new JButton("Agregar revista");
+        JButton addButton = new JButton("Agregar Libro");
 
         // Add components to the frame
         add(libro_idLabel);
@@ -104,13 +104,13 @@ public class New_libro extends JFrame {
 
             int rowsAffected = preparedStatement.executeUpdate();
             if (rowsAffected > 0) {
-                JOptionPane.showMessageDialog(this, "revista agregada correctamente.");
+                JOptionPane.showMessageDialog(this, "libro agregado correctamente.");
                 if (callback != null) {
                     callback.onConfirm();
                 }
                 dispose(); // Close the window after adding the libro
             } else {
-                JOptionPane.showMessageDialog(this, "Error al agregar el revista.");
+                JOptionPane.showMessageDialog(this, "Error al agregar el libro.");
             }
 
         } catch (SQLException ex) {
