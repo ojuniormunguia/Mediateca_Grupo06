@@ -66,7 +66,7 @@ public class New_dvd extends JFrame {
         String libro_id = idField.getText();
         String titulo = tituloField.getText();
         String director = directorField.getText();
-        Float duracion = Float.parseFloat(duracionField.getText()); 
+        Float duracion = Float.parseFloat(duracionField.getText());
         String genero = generoField.getText();
         Integer dvdDisp = Integer.parseInt(dvdDispField.getText());
 

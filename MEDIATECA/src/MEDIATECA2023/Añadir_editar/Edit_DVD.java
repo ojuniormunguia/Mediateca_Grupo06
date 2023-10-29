@@ -9,89 +9,80 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class Edit_CD extends JFrame {
+public class Edit_DVD extends JFrame {
     private JTextField idField;
     private JTextField tituloField;
-    private JTextField artistaField;
-    private JTextField generoField;
+    private JTextField directorField;
     private JTextField duracionField;
-    private JTextField numeroField;
-    private JTextField dispField;
-    private ConfirmedCD callback;
+    private JTextField generoField;
+    private JTextField dvdDispField;
+    private New_dvd.ConfirmedDVD callback;
 
     private String originalId;
     private String originalTitulo;
-    private String originalArtista;
-    private String originalGenero;
+    private String originalDirector;
     private double originalDuracion;
-    private int originalNumero;
-    private int originalDisp;
+    private String originalGenero;
+    private int originalDvdDisp;
 
-
-    public Edit_CD(String id, String titulo, String artista, String genero, double duracion, int numero, int disp) {
+    public Edit_DVD(String id, String titulo, String director, double duracion, String genero, int dvdDisp) {
         setTitle("Editar CD");
         setSize(400, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new GridLayout(10, 2));
+        setLayout(new GridLayout(8, 1));
 
-        JLabel cd_idLabel = new JLabel("id:");
         originalId = id;
-        JLabel tituloLabel = new JLabel("titulo:");
         originalTitulo = titulo;
-        JLabel artistaLabel = new JLabel("artista:");
-        originalArtista = artista;
-        JLabel generoLabel = new JLabel("genero:");
-        originalGenero = genero;
-        JLabel duracionLabel = new JLabel("duracion:");
+        originalDirector = director;
         originalDuracion = duracion;
-        JLabel numeroLabel = new JLabel("numero de canciones:");
-        originalNumero = numero;
-        JLabel dispLabel = new JLabel("cd disponibles:");
-        originalDisp = disp;
+        originalGenero = genero;
+        originalDvdDisp = dvdDisp;
 
-
+        JLabel dvd_idLabel = new JLabel("id:");
         idField = new JTextField(id);
+        JLabel tituloLabel = new JLabel("titulo:");
         tituloField = new JTextField(titulo);
-        artistaField = new JTextField(artista);
-        generoField = new JTextField(genero);
+        JLabel directorLabel = new JLabel("director:");
+        directorField = new JTextField(director);
+        JLabel duracionLabel = new JLabel("duracion:");
         duracionField = new JTextField(Double.toString(duracion));
-        numeroField = new JTextField(Integer.toString(numero));
-        dispField = new JTextField(Integer.toString(disp));
+        JLabel generoLabel = new JLabel("genero:");
+        generoField = new JTextField(genero);
+        JLabel dvdDispLabel = new JLabel("dvds disponibles:");
+        dvdDispField = new JTextField(Integer.toString(dvdDisp));
+
 
         JButton saveButton = new JButton("Guardar Cambios");
 
-        add(cd_idLabel);
+        add(dvd_idLabel);
         add(idField);
         add(tituloLabel);
         add(tituloField);
-        add(artistaLabel);
-        add(artistaField);
-        add(generoLabel);
-        add(generoField);
+        add(directorLabel);
+        add(directorField);
         add(duracionLabel);
         add(duracionField);
-        add(numeroLabel);
-        add(numeroField);
-        add(dispLabel);
-        add(dispField);
+        add(generoLabel);
+        add(generoField);
+        add(dvdDispLabel);
+        add(dvdDispField);
         add(saveButton);
 
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                updateCdInDatabase();
+                updateDvdInDatabase();
             }
         });
     }
 
-    private void updateCdInDatabase() {
+    private void updateDvdInDatabase() {
         String id = idField.getText();
         String titulo = tituloField.getText();
-        String artista = artistaField.getText();
-        String genero = generoField.getText();
+        String director = directorField.getText();
         double duracion = Double.parseDouble(duracionField.getText());
-        int numero = Integer.parseInt(numeroField.getText());
-        int disp = Integer.parseInt(dispField.getText());
+        String genero = generoField.getText();
+        int dvdDisp = Integer.parseInt(dvdDispField.getText());
 
         try {
             Connection connection = DriverManager.getConnection(
@@ -100,16 +91,14 @@ public class Edit_CD extends JFrame {
                     "Danibanani2619"
             );
 
-            String updateSql = "UPDATE cd SET cd_id = ?, titulo = ?, artista = ?, genero = ?, duracion = ?, numero_canciones = ?, cdDisp = ? WHERE cd_id = ?";
+            String updateSql = "UPDATE dvds SET dvd_id = ?, titulo = ?, director = ?, genero = ?, dvdDisp = ? WHERE dvd_id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(updateSql);
             preparedStatement.setString(1, id);
             preparedStatement.setString(2, titulo);
-            preparedStatement.setString(3, artista);
+            preparedStatement.setString(3, director);
             preparedStatement.setString(4, genero);
-            preparedStatement.setDouble(5, duracion);
-            preparedStatement.setInt(6, numero);
-            preparedStatement.setInt(7, disp);
-            preparedStatement.setString(8, originalId);
+            preparedStatement.setInt(5, dvdDisp);
+            preparedStatement.setString(6, originalId);
 
             int rowsAffected = preparedStatement.executeUpdate();
             if (rowsAffected > 0) {
@@ -127,11 +116,8 @@ public class Edit_CD extends JFrame {
         }
     }
 
-    public void setCallback(ConfirmedCD callback) {
+    public void setCallbackdvd(New_dvd.ConfirmedDVD callback) {
         this.callback = callback;
     }
 
-    public interface ConfirmedCD {
-        void onConfirm();
-    }
 }

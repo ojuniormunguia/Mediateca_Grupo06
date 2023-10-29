@@ -1,7 +1,6 @@
 package MEDIATECA2023;
 
 import MEDIATECA2023.Añadir_editar.*;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -13,11 +12,20 @@ import java.util.Vector;
 import java.util.HashMap;
 public class Main extends JFrame {
     private JPanel contentPanel;
-    private DefaultTableModel tableModel;
-    private JTable dataTable;
+    public String permisos;
+    public String identificador;
 
-    public Main() {
-        // Colores (temporalmente)
+
+    public Main(String userId, String permissionType) {
+        Connection connection = DatabaseConnection.getConnection();
+
+        Login login = new Login();
+
+
+        System.out.println(userId + " " + permissionType);
+        permisos = permissionType;
+        identificador = userId;
+
         Color primaryColor = new Color(34, 139, 34);
         Color secondaryColor = new Color(0, 102, 204);
 
@@ -32,24 +40,26 @@ public class Main extends JFrame {
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
 
         //botones
-        JButton menuItem1 = createStyledButton("TODOS", primaryColor, Color.white);
-        JButton menuItem2 = createStyledButton("DISPONIBLES", primaryColor, Color.white);
-        JButton menuItem3 = createStyledButton("AGREGAR", primaryColor, Color.white);
+        JButton todos = createStyledButton("TODOS", primaryColor, Color.white);
+        JButton disponibles = createStyledButton("DISPONIBLES", primaryColor, Color.white);
+        JButton agregar = createStyledButton("AGREGAR", primaryColor, Color.white);
+        JButton rentado = createStyledButton("RENTADO", primaryColor, Color.white);
 
-        menuPanel.add(menuItem1);
-        menuPanel.add(menuItem2);
-        menuPanel.add(menuItem3);
+        menuPanel.add(todos);
+        menuPanel.add(disponibles);
+        menuPanel.add(agregar);
+        menuPanel.add(rentado);
 
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
 
-        // Default content
+        // Contenido por defecto
         JLabel contentLabel = new JLabel("Elija el contenido a mostrar");
         contentLabel.setHorizontalAlignment(JLabel.CENTER);
         contentPanel.add(contentLabel, BorderLayout.CENTER);
 
 
-        menuItem1.addActionListener(new ActionListener() {
+        todos.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JPanel subMenuPanel = new JPanel();
@@ -93,16 +103,16 @@ public class Main extends JFrame {
             }
         });
 
-        menuItem2.addActionListener(new ActionListener() {
+        //PRESIONA "DISPONIBLES"
+        disponibles.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JLabel newContentLabel = new JLabel("ITEMS DISPONIBLES");
-                newContentLabel.setHorizontalAlignment(JLabel.CENTER);
-                setContentPanel(newContentLabel);
+                displayAvailableTable("cd");
+
             }
         });
-
-        menuItem3.addActionListener(new ActionListener() {
+        //PRESIONA AGREGAR
+        agregar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JPanel subMenuPanel2 = new JPanel();
@@ -165,6 +175,15 @@ public class Main extends JFrame {
             }
         });
 
+        //RENTADOS
+        rentado.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                displayRentedTable("cd");
+
+            }
+        });
+
         add(menuPanel, BorderLayout.WEST);
         add(contentPanel, BorderLayout.CENTER);
 
@@ -208,18 +227,12 @@ public class Main extends JFrame {
         contentPanel.revalidate();
         contentPanel.repaint();
     }
-
+    //MUESTRA TABLA CON TODO EL CONTENIDO
     private void displayTable(String tableName) {
-
-
-
         try {
-            Connection connection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/mediateca",
-                    "root",
-                    "Danibanani2619");
-            Statement statement = connection.createStatement();
+            Connection connection = DatabaseConnection.getConnection();
 
+            Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName);
 
             JFrame frame = new JFrame("Lista de " + tableName);
@@ -285,7 +298,7 @@ public class Main extends JFrame {
                             DefaultTableModel newModel = buildTableModel(statement1.executeQuery("SELECT * FROM " + tableName));
                             table.setModel(newModel);
                             JOptionPane.showMessageDialog(frame, "Item borrado exitosamente.");}
-                            //FIN DE REFRESCAR LA PÁGINA
+                        //FIN DE REFRESCAR LA PÁGINA
 
                         else {
                             JOptionPane.showMessageDialog(frame, "La tabla seleccionada no es válida.");
@@ -304,9 +317,185 @@ public class Main extends JFrame {
     }
 
 
+    //MUESTRA TABLA CON EL CONTENIDO DISPONIBLE
+
+
+
+    private void displayAvailableTable(String tableName) {
+        ColectorDeColumnas mapper = new ColectorDeColumnas();
+
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            Statement statement = connection.createStatement();
+            String dispColumn = mapper.getDispColumn(tableName);
+            String primaryKey = mapper.getPrimaryKey(tableName);
+            String userKey;
+            if (permisos == "adm_"){
+                userKey = "admin_id";
+            }
+            else{
+                userKey = "socio_id";
+            }
+            String rentedItemsQuery = "SELECT " + primaryKey + " FROM " + permisos + tableName + " WHERE " + userKey + " = '" + identificador + "'";
+            String availableItemsQuery = "SELECT * FROM " + tableName + " WHERE " + dispColumn + " > 0 AND " + primaryKey + " NOT IN (" + rentedItemsQuery + ")";
+            ResultSet resultSet = statement.executeQuery(availableItemsQuery);
+
+
+            JFrame frame = new JFrame("Lista de " + tableName);
+            JTable table = new JTable(buildTableModel(resultSet));
+            JScrollPane scrollPane = new JScrollPane(table);
+            contentPanel.removeAll();
+            contentPanel.add(scrollPane, BorderLayout.CENTER);
+
+            Color secondaryColor = new Color(255, 165, 0);
+
+            JButton rentButton = createStyledButton("Rentar", secondaryColor, Color.white);
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.add(rentButton);
+
+            contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+            contentPanel.revalidate();
+            contentPanel.repaint();
+
+
+
+            rentButton.addActionListener(e -> {
+                int selectedRow = table.getSelectedRow();
+
+                int lastColumnIndex = table.getColumnCount() - 1;
+
+                if (selectedRow != -1) {
+                    String id = (String) table.getValueAt(selectedRow, 0);
+                    int disp = (int) table.getValueAt(selectedRow,lastColumnIndex);
+                    if (disp > 0) {
+                        try {
+                            String sqlQuery = "UPDATE " + tableName + " SET " + dispColumn + " = " + (disp - 1) + " WHERE " + primaryKey + " = '" + id + "'";
+                            System.out.println("SQL Query: " + sqlQuery);
+                            Statement updateStatement = connection.createStatement();
+                            updateStatement.executeUpdate("UPDATE " + tableName + " SET " + dispColumn + " = " + (disp - 1) + " WHERE " + primaryKey + " = '" + id + "'");
+                            updateStatement.executeUpdate("INSERT INTO " + permisos + tableName + " (" + userKey + ", " + primaryKey + ") VALUES ('" + identificador + "', '" + id + "')");
+                            System.out.println("INSERT INTO " + permisos + tableName + " (" + userKey + ", " + primaryKey + ") VALUES ('" + identificador + "', '" + id + "')");
+                            displayAvailableTable(tableName);
+
+
+
+
+                            updateStatement.executeUpdate(sqlQuery);
+                            JOptionPane.showMessageDialog(frame, "Elemento rentado exitosamente.");
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "No hay elementos disponibles para rentar.");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Elija un elemento para rentar.");
+                }
+            });
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+    //TABLA DE RENTADOS
+    private void displayRentedTable(String tableName) {
+        Connection connection = DatabaseConnection.getConnection();
+
+        Login login = new Login();
+        ColectorDeColumnas mapper = new ColectorDeColumnas();
+        try {
+            Statement statement = connection.createStatement();
+            //encontrar Disp y PrimaryKey
+            String dispColumn = mapper.getDispColumn(tableName);
+            String primaryKey = mapper.getPrimaryKey(tableName);
+            String joined = mapper.getJoin(tableName);
+            String userKey;
+            if (permisos == "adm_"){
+                userKey = "admin_id";
+            }
+            else{
+                userKey = "socio_id";
+            }
+
+
+            //Seleccionar todo lo rentado por el usuario
+            String test = "SELECT " + tableName + ".* FROM " + tableName + " INNER JOIN " + permisos + joined + " ON " + tableName + "." + primaryKey + " = " + permisos + tableName + "." + primaryKey + " WHERE " + permisos + joined + "." + userKey + " = '" + identificador + "'";
+            System.out.println(test);
+            ResultSet resultSet = statement.executeQuery("SELECT " + tableName + ".* FROM " + tableName + " INNER JOIN " + permisos + joined + " ON " + tableName + "." + primaryKey + " = " + permisos + joined + "." + primaryKey + " WHERE " + permisos + joined + "." + userKey + " = '" + identificador + "'");
+
+            JFrame frame = new JFrame("Lista de " + tableName);
+            JTable table = new JTable(buildTableModel(resultSet));
+            JScrollPane scrollPane = new JScrollPane(table);
+            contentPanel.removeAll();
+            contentPanel.add(scrollPane, BorderLayout.CENTER);
+
+            Color secondaryColor = new Color(255, 165, 0);
+
+            JButton returnButton = createStyledButton("Devolver", secondaryColor, Color.white);
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.add(returnButton);
+
+            contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+            contentPanel.revalidate();
+            contentPanel.repaint();
+
+
+
+            returnButton.addActionListener(e -> {
+                int selectedRow = table.getSelectedRow();
+
+                int lastColumnIndex = table.getColumnCount() - 1;
+
+                if (selectedRow != -1) {
+                    String id = (String) table.getValueAt(selectedRow, 0);
+                    int disp = (int) table.getValueAt(selectedRow,lastColumnIndex);
+                    if (disp > 0) {
+                        try {
+                            //INSERT INTO adm_cd (admin_id, cd_id) VALUES (1, 1);
+                            String sqlQuery = "DELETE FROM " + permisos + tableName + " WHERE " + userKey + " = " + identificador + " AND " + primaryKey + " = " + id;
+                            //System.out.println("SQL Query: " + sqlQuery);
+                            Statement updateStatement = connection.createStatement();
+                            updateStatement.executeUpdate("UPDATE " + tableName + " SET " + dispColumn + " = " + (disp + 1) + " WHERE " + primaryKey + " = '" + id + "'");
+                            updateStatement.executeUpdate("DELETE FROM " + permisos + tableName + " WHERE " + userKey + " = '" + identificador + "' AND " + primaryKey + " = '" + id + "'");
+                            displayRentedTable(tableName);
+
+                            JOptionPane.showMessageDialog(frame, "Elemento regresado exitosamente.");
+                        } catch (SQLException ex) {
+                            ex.printStackTrace();
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(frame, "No hay elementos disponibles para devolver.");
+                    }
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Elija un elemento para devolver.");
+                }
+            });
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+
     public static void main(String[] args) {
+
         SwingUtilities.invokeLater(() -> {
-            new Main();
+            Connection connection = DatabaseConnection.getConnection();
+
+            Login login = new Login();
+
+            // LOS MANDA A INICIO DE SESION
+
+            JFrame frame = new JFrame("Login");
+
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+
+            frame.add(login.main());
+
+            frame.setSize(400, 200);
+            frame.setVisible(true);
         });
     }
+
 }
